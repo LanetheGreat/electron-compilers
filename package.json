@@ -1,6 +1,6 @@
 {
   "name": "@lanethegreat/electron-compilers",
-  "version": "5.9.1",
+  "version": "5.9.2",
   "description": "Compiler implementations for electron-compile",
   "main": "lib/main.js",
   "scripts": {
