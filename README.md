@@ -1,15 +1,15 @@
-## DEPRECATED: electron-compilers
+## (Unofficially) UNDEPRECATED: electron-compilers
 
-[![No Maintenance Intended](http://unmaintained.tech/badge.svg)](http://unmaintained.tech/)
+[![Unofficially Maintained](https://img.shields.io/badge/Unofficially%20Maintained%3F-yes-green.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity)
 
-This project is no longer maintained, pull requests are no longer being reviewed or merged and issues are no longer being responded to. 
+This project is now (unofficially) maintained by Lane Shaw, new pull requests will be reviewed (as time permits) or merged and new issues can be reported here.
 
 ---
 
 [![](https://electron-userland.github.io/electron-compilers/docs/badge.svg)](https://electron-userland.github.io/electron-compilers/docs)
 
 electron-compilers are the actual implementations of classes that power
-[electron-compile](https://github.com/electron-userland/electron-compile)
+[electron-compile](https://github.com/LanetheGreat/electron-compile)
 
 For JavaScript:
 

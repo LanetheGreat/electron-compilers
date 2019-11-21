@@ -1,5 +1,5 @@
 {
-  "name": "electron-compilers",
+  "name": "@lanethegreat/electron-compilers",
   "version": "5.9.0",
   "description": "Compiler implementations for electron-compile",
   "main": "lib/main.js",
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/paulcbetts/electron-compilers"
+    "url": "https://github.com/LanetheGreat/electron-compilers"
   },
   "keywords": [
     "electron"
@@ -19,15 +19,15 @@
   "author": "Paul Betts <paul@paulbetts.org>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/paulcbetts/electron-compilers/issues"
+    "url": "https://github.com/LanetheGreat/electron-compilers/issues"
   },
-  "homepage": "https://github.com/paulcbetts/electron-compilers",
+  "homepage": "https://github.com/LanetheGreat/electron-compilers",
   "engines": {
     "node": ">= 5.0"
   },
   "dependencies": {
     "@paulcbetts/mime-types": "^2.1.10",
-    "@paulcbetts/vueify": "9.4.3",
+    "@paulcbetts/vueify": "^9.4.3",
     "babel-core": "^6.13.2",
     "babel-preset-env": "^1.3.2",
     "btoa": "^1.1.2",
@@ -67,7 +67,7 @@
     "babel-preset-react": "^6.11.1",
     "babel-register": "^6.18.0",
     "esdoc": "^0.4.8",
-    "esdoc-es7-plugin": "0.0.3",
+    "esdoc-es7-plugin": "^0.0.3",
     "esdoc-plugin-async-to-sync": "^0.5.0",
     "eslint": "^3.3.0"
   }
