@@ -3,7 +3,7 @@ import path from 'path';
 import jsEscape from 'js-string-escape';
 
 const inputMimeTypes = ['text/typescript', 'text/tsx'];
-const d = require('debug')('electron-compile:typescript-compiler');
+const d = require('debug')('@lanethegreat/electron-compile:typescript-compiler');
 
 let ts = null;
 let istanbul = null;
