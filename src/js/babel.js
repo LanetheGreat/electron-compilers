@@ -74,7 +74,7 @@ export default class BabelCompiler extends SimpleCompilerBase {
   }
 
   compileSync(sourceCode, filePath, compilerContext) { // eslint-disable-line no-unused-vars
-    babel = babel || require('babel-core');
+    babel = babel || require('@babel/core');
 
     let opts = Object.assign({}, this.compilerOptions, {
       filename: filePath,
@@ -113,6 +113,6 @@ export default class BabelCompiler extends SimpleCompilerBase {
   }
 
   getCompilerVersion() {
-    return require('babel-core/package.json').version;
+    return require('@babel/core/package.json').version;
   }
 }
