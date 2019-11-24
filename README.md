@@ -26,6 +26,7 @@ For CSS:
 For HTML:
 
 * Jade
+* Pug (2.0)
 
 For JSON:
 
