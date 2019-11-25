@@ -118,7 +118,11 @@ export default class StylusCompiler extends CompilerBase {
     let dependencies = [];
 
     for (let dependencyName of dependencyFilenames) {
-      dependencies.push(lookup(dependencyName, path.basename(filePath), path.dirname(filePath)));
+      dependencies.push(lookup({
+        dependency: dependencyName,
+        filename: path.basename(filePath),
+        directory: path.dirname(filePath)
+      }));
     }
 
     return dependencies;

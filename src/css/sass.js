@@ -95,7 +95,11 @@ export default class SassCompiler extends CompilerBase {
     let dependencies = [];
 
     for (let dependencyName of dependencyFilenames) {
-      dependencies.push(sassLookup(dependencyName, path.basename(filePath), path.dirname(filePath)));
+      dependencies.push(sassLookup({
+        dependency: dependencyName,
+        filename: path.basename(filePath),
+        directory: path.dirname(filePath)
+      }));
     }
 
     return dependencies;
