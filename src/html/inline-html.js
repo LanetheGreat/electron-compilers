@@ -161,7 +161,7 @@ export default class InlineHtmlCompiler extends CompilerBase {
       if (src.match(/^file:/i)) return;
 
       // Absolute path? Bail.
-      if (src.match(/^([\/]|[A-Za-z]:)/i)) return;
+      if (src.match(/^([/]|[A-Za-z]:)/i)) return;
 
       try {
         $(el).attr('src', path.resolve(path.dirname(filePath), src));
@@ -252,7 +252,7 @@ export default class InlineHtmlCompiler extends CompilerBase {
       if (src.match(/^file:/i)) return;
 
       // Absolute path? Bail.
-      if (src.match(/^([\/]|[A-Za-z]:)/i)) return;
+      if (src.match(/^([/]|[A-Za-z]:)/i)) return;
 
       try {
         $(el).attr('src', path.resolve(path.dirname(filePath), src));
