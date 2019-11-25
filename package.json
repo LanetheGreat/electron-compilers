@@ -33,7 +33,7 @@
     "@paulcbetts/vueify": "^9.4.3",
     "acorn": "^7.0.0",
     "btoa": "^1.1.2",
-    "cheerio": "^1.0.0-rc.3",
+    "cheerio": ">=0.20",
     "coffeescript": "^2.0.0",
     "cson": "^6.0.0",
     "debug": "^4.0.0",
