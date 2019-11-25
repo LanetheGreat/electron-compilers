@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/LanetheGreat/electron-compilers",
   "engines": {
-    "node": ">= 6.0"
+    "node": ">= 8.0"
   },
   "dependencies": {
     "@babel/core": "^7.0.0",
