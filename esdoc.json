@@ -18,6 +18,7 @@
         },
         "manual": {
           "index": "./README.md",
+          "globalIndex": true,
           "files": []
         }
       }

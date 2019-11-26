@@ -2,6 +2,7 @@ test-dist/
 docs/
 src/
 .babelrc
+.eslintrc
 .npmignore
 .travis.yml
 *.md
