@@ -22,6 +22,7 @@ For CSS:
 
 * LESS
 * Stylus (with optional nib)
+* SASS/SCSS (sass.js)
 
 For HTML:
 
