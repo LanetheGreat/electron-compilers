@@ -3,7 +3,7 @@ import fs from 'fs';
 import toutSuite from 'toutsuite';
 import detectiveSASS from 'detective-sass';
 import detectiveSCSS from 'detective-scss';
-import sassLookup from 'sass-lookup';
+import cabinet from 'filing-cabinet';
 import {CompilerBase} from '../compiler-base';
 
 const mimeTypes = ['text/sass', 'text/scss'];
@@ -95,9 +95,9 @@ export default class SassCompiler extends CompilerBase {
     let dependencies = [];
 
     for (let dependencyName of dependencyFilenames) {
-      dependencies.push(sassLookup({
-        dependency: dependencyName,
-        filename: path.basename(filePath),
+      dependencies.push(cabinet({
+        partial: dependencyName,
+        filename: filePath,
         directory: path.dirname(filePath)
       }));
     }

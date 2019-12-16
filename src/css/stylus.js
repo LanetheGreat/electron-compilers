@@ -1,6 +1,6 @@
 import path from 'path';
 import detective from 'detective-stylus';
-import lookup from 'stylus-lookup';
+import cabinet from 'filing-cabinet';
 import {CompilerBase} from '../compiler-base';
 import {basename} from 'path';
 
@@ -118,9 +118,9 @@ export default class StylusCompiler extends CompilerBase {
     let dependencies = [];
 
     for (let dependencyName of dependencyFilenames) {
-      dependencies.push(lookup({
-        dependency: dependencyName,
-        filename: path.basename(filePath),
+      dependencies.push(cabinet({
+        partial: dependencyName,
+        filename: filePath,
         directory: path.dirname(filePath)
       }));
     }

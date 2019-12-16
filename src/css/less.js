@@ -1,5 +1,6 @@
 import path from 'path';
 import detective from 'detective-less';
+import cabinet from 'filing-cabinet';
 import {CompilerBase} from '../compiler-base';
 import toutSuite from 'toutsuite';
 
@@ -75,7 +76,11 @@ export default class LessCompiler extends CompilerBase {
     let dependencies = [];
 
     for (let dependencyName of dependencyFilenames) {
-      dependencies.push(path.join(path.dirname(filePath), dependencyName));
+      dependencies.push(cabinet({
+        partial: dependencyName,
+        filename: filePath,
+        directory: path.dirname(filePath)
+      }));
     }
 
     return dependencies;
