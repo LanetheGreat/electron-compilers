@@ -53,10 +53,11 @@ export default class SassCompiler extends CompilerBase {
 
     sass.importer(this.buildImporterCallback(paths));
 
-    let opts = Object.assign({}, this.compilerOptions, {
+    let opts = {
+      ...this.compilerOptions,
       indentedSyntax: filePath.match(/\.sass$/i),
       sourceMapRoot: filePath,
-    });
+    };
 
     let result = await new Promise((res,rej) => {
       sass.compile(sourceCode, opts, (r) => {
@@ -120,10 +121,11 @@ export default class SassCompiler extends CompilerBase {
     paths.unshift('.');
     sass.importer(this.buildImporterCallback(paths));
 
-    let opts = Object.assign({}, this.compilerOptions, {
+    let opts = {
+      ...this.compilerOptions,
       indentedSyntax: filePath.match(/\.sass$/i),
       sourceMapRoot: filePath,
-    });
+    };
 
     let result;
     toutSuite(() => {

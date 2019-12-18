@@ -21,7 +21,11 @@ export default class PugCompiler extends SimpleCompilerBase {
 
     let code = pug.render(
       sourceCode,
-      Object.assign({ filename: filePath, cache: false }, this.compilerOptions));
+      {
+        filename: filePath,
+        cache: false, 
+        ...this.compilerOptions
+      });
 
     return { code, mimeType: 'text/html' };
   }

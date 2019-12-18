@@ -76,11 +76,12 @@ export default class BabelCompiler extends SimpleCompilerBase {
   compileSync(sourceCode, filePath, compilerContext) { // eslint-disable-line no-unused-vars
     babel = babel || require('@babel/core');
 
-    let opts = Object.assign({}, this.compilerOptions, {
+    let opts = {
+      ...this.compilerOptions,
       filename: filePath,
       ast: false,
       babelrc: false
-    });
+    };
 
     let useCoverage = false;
     if ('coverage' in opts) {

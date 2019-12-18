@@ -45,10 +45,11 @@ export default class LessCompiler extends CompilerBase {
       paths.push(...this.compilerOptions.paths);
     }
 
-    let opts = Object.assign({}, this.compilerOptions, {
+    let opts = {
+      ...this.compilerOptions,
       paths: paths,
       filename: path.basename(filePath)
-    });
+    };
 
     let result = await lessjs.render(sourceCode, opts);
     let source = result.css;
@@ -101,11 +102,12 @@ export default class LessCompiler extends CompilerBase {
       paths.push(...this.compilerOptions.paths);
     }
 
-    let opts = Object.assign({}, this.compilerOptions, {
+    let opts = {
+      ...this.compilerOptions,
       paths: paths,
       filename: path.basename(filePath),
       fileAsync: false, async: false, syncImport: true
-    });
+    };
 
     toutSuite(() => {
       lessjs.render(sourceCode, opts, (err, out) => {

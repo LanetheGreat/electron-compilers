@@ -69,9 +69,10 @@ export default class StylusCompiler extends CompilerBase {
   }
 
   makeOpts(filePath) {
-    let opts = Object.assign({}, this.compilerOptions, {
+    let opts = {
+      ...this.compilerOptions,
       filename: basename(filePath)
-    });
+    };
 
     if (opts.import && !Array.isArray(opts.import)) {
       opts.import = [opts.import];

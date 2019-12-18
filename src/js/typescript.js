@@ -30,7 +30,7 @@ export default class TypeScriptCompiler extends SimpleCompilerBase {
     let parsedConfig = this.parsedConfig;
 
     if (!parsedConfig) {
-      let opts = Object.assign({}, this.compilerOptions);
+      let opts = {...this.compilerOptions};
       let builtinOpts = {};
       builtinKeys.forEach((k) => {
         if (k in this.compilerOptions) {

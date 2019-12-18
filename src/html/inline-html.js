@@ -107,10 +107,11 @@ export default class InlineHtmlCompiler extends CompilerBase {
     toWait.push(this.each($('style'), async (i, el) => {
       let mimeType = $(el).attr('type') || 'text/plain';
 
-      let thisCtx = Object.assign({
+      let thisCtx = {
         count: styleCount++,
-        tag: 'style'
-      }, compilerContext);
+        tag: 'style',
+        ...compilerContext
+      };
 
       let origText = $(el).text();
       let newText = await that.compileBlock(origText, filePath, mimeType, thisCtx);
@@ -129,10 +130,11 @@ export default class InlineHtmlCompiler extends CompilerBase {
         return;
       }
 
-      let thisCtx = Object.assign({
+      let thisCtx = {
         count: scriptCount++,
-        tag: 'script'
-      }, compilerContext);
+        tag: 'script',
+        ...compilerContext
+      };
 
       let mimeType = $(el).attr('type') || 'application/javascript';
       let origText = $(el).text();
@@ -197,10 +199,11 @@ export default class InlineHtmlCompiler extends CompilerBase {
     this.eachSync($('style'), async (i, el) => {
       let mimeType = $(el).attr('type');
 
-      let thisCtx = Object.assign({
+      let thisCtx = {
         count: styleCount++,
-        tag: 'style'
-      }, compilerContext);
+        tag: 'style',
+        ...compilerContext
+      };
 
       let origText = $(el).text();
       let newText = that.compileBlockSync(origText, filePath, mimeType, thisCtx);
@@ -219,10 +222,11 @@ export default class InlineHtmlCompiler extends CompilerBase {
         return;
       }
 
-      let thisCtx = Object.assign({
+      let thisCtx = {
         count: scriptCount++,
-        tag: 'script'
-      }, compilerContext);
+        tag: 'script',
+        ...compilerContext
+      };
 
       let mimeType = $(el).attr('type');
 

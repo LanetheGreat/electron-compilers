@@ -21,7 +21,11 @@ export default class JadeCompiler extends SimpleCompilerBase {
 
     let code = jade.render(
       sourceCode,
-      Object.assign({ filename: filePath, cache: false }, this.compilerOptions));
+      {
+        filename: filePath,
+        cache: false,
+        ...this.compilerOptions
+      });
 
     return { code, mimeType: 'text/html' };
   }
