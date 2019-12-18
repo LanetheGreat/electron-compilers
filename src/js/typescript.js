@@ -20,6 +20,7 @@ export default class TypeScriptCompiler extends SimpleCompilerBase {
       inlineSourceMap: true,
       inlineSources: true
     };
+    this.instrumenter = null;
   }
 
   static getInputMimeTypes() {
@@ -67,12 +68,18 @@ export default class TypeScriptCompiler extends SimpleCompilerBase {
 
     let output = ts.transpileModule(sourceCode, transpileOptions);
     let sourceMaps = output.sourceMapText ? output.sourceMapText : null;
-    if (options.builtinOpts.coverage) {
-      sourceMaps = null;
-      istanbul = istanbul || require('istanbul');
+    if ('coverage' in options.builtinOpts) {
+      const coverageOpts = {
+        esModules: true,
+        produceSourceMap: true,
+        ...options.builtinOpts.coverage
+      };
+      istanbul = istanbul || require('istanbul-lib-instrument');
 
-      sourceMaps = null;
-      output.outputText = (new istanbul.Instrumenter()).instrumentSync(output.outputText, filePath);
+      this.instrumenter = this.instrumenter || new istanbul.createInstrumenter(coverageOpts);
+
+      output.outputText = this.instrumenter.instrumentSync(output.outputText, filePath, output.sourceMapText);
+      sourceMaps = this.instrumenter.sourceMap ? JSON.stringify(this.instrumenter.sourceMap) : null;
     }
 
     d(JSON.stringify(output.diagnostics));

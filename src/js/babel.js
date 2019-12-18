@@ -8,6 +8,7 @@ let istanbul = null;
 export default class BabelCompiler extends SimpleCompilerBase {
   constructor() {
     super();
+    this.instrumenter = null;
   }
 
   static getInputMimeTypes() {
@@ -84,8 +85,13 @@ export default class BabelCompiler extends SimpleCompilerBase {
     };
 
     let useCoverage = false;
+    let coverageOpts = {
+      esModules: true,
+      produceSourceMap: true
+    };
     if ('coverage' in opts) {
-      useCoverage = !!opts.coverage;
+      useCoverage = true;
+      Object.assign(coverageOpts, opts.coverage);
       delete opts.coverage;
     }
 
@@ -104,10 +110,12 @@ export default class BabelCompiler extends SimpleCompilerBase {
 
     let code = output.code;
     if (useCoverage) {
-      istanbul = istanbul || require('istanbul');
+      istanbul = istanbul || require('istanbul-lib-instrument');
 
-      sourceMaps = null;
-      code = (new istanbul.Instrumenter()).instrumentSync(output.code, filePath);
+      this.instrumenter = this.instrumenter || new istanbul.createInstrumenter(coverageOpts);
+
+      code = this.instrumenter.instrumentSync(output.code, filePath, output.map);
+      sourceMaps = this.instrumenter.sourceMap ? JSON.stringify(this.instrumenter.sourceMap) : null;
     }
 
     return { code, sourceMaps, mimeType: 'application/javascript', };
