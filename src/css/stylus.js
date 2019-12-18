@@ -1,6 +1,6 @@
 import path from 'path';
 import detective from 'detective-stylus';
-import lookup from 'stylus-lookup';
+import cabinet from 'filing-cabinet';
 import {CompilerBase} from '../compiler-base';
 import {basename} from 'path';
 
@@ -69,9 +69,10 @@ export default class StylusCompiler extends CompilerBase {
   }
 
   makeOpts(filePath) {
-    let opts = Object.assign({}, this.compilerOptions, {
+    let opts = {
+      ...this.compilerOptions,
       filename: basename(filePath)
-    });
+    };
 
     if (opts.import && !Array.isArray(opts.import)) {
       opts.import = [opts.import];
@@ -118,7 +119,11 @@ export default class StylusCompiler extends CompilerBase {
     let dependencies = [];
 
     for (let dependencyName of dependencyFilenames) {
-      dependencies.push(lookup(dependencyName, path.basename(filePath), path.dirname(filePath)));
+      dependencies.push(cabinet({
+        partial: dependencyName,
+        filename: filePath,
+        directory: path.dirname(filePath)
+      }));
     }
 
     return dependencies;

@@ -43,9 +43,9 @@ export class CompilerBase {
 
   /**
    * Returns the dependent files of this file. This is used for languages such
-   * as LESS which allow you to import / reference other related files. In future
-   * versions of electron-compile, we will use this information to invalidate
-   * all of the parent files if a child file changes.
+   * as LESS which allow you to import / reference other related files. This is
+   * needed so that electron-compile, can trigger a hot-reload on pages with
+   * resources that depend on children files that have changed.
    *
    * @param  {string} sourceCode    The contents of filePath
    * @param  {string} fileName        The full path of a file to compile.

@@ -1,5 +1,6 @@
 import path from 'path';
 import detective from 'detective-less';
+import cabinet from 'filing-cabinet';
 import {CompilerBase} from '../compiler-base';
 import toutSuite from 'toutsuite';
 
@@ -44,10 +45,11 @@ export default class LessCompiler extends CompilerBase {
       paths.push(...this.compilerOptions.paths);
     }
 
-    let opts = Object.assign({}, this.compilerOptions, {
+    let opts = {
+      ...this.compilerOptions,
       paths: paths,
       filename: path.basename(filePath)
-    });
+    };
 
     let result = await lessjs.render(sourceCode, opts);
     let source = result.css;
@@ -75,7 +77,11 @@ export default class LessCompiler extends CompilerBase {
     let dependencies = [];
 
     for (let dependencyName of dependencyFilenames) {
-      dependencies.push(path.join(path.dirname(filePath), dependencyName));
+      dependencies.push(cabinet({
+        partial: dependencyName,
+        filename: filePath,
+        directory: path.dirname(filePath)
+      }));
     }
 
     return dependencies;
@@ -96,11 +102,12 @@ export default class LessCompiler extends CompilerBase {
       paths.push(...this.compilerOptions.paths);
     }
 
-    let opts = Object.assign({}, this.compilerOptions, {
+    let opts = {
+      ...this.compilerOptions,
       paths: paths,
       filename: path.basename(filePath),
       fileAsync: false, async: false, syncImport: true
-    });
+    };
 
     toutSuite(() => {
       lessjs.render(sourceCode, opts, (err, out) => {

@@ -22,10 +22,12 @@ For CSS:
 
 * LESS
 * Stylus (with optional nib)
+* SASS/SCSS (sass.js)
 
 For HTML:
 
 * Jade
+* Pug (2.0)
 
 For JSON:
 

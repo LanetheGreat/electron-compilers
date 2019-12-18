@@ -1,1 +1,11 @@
 test-dist/
+docs/
+src/
+.babelrc
+.eslintrc
+.npmignore
+.travis.yml
+*.md
+esdoc.json
+/.project
+/.settings

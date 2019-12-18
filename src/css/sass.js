@@ -3,7 +3,7 @@ import fs from 'fs';
 import toutSuite from 'toutsuite';
 import detectiveSASS from 'detective-sass';
 import detectiveSCSS from 'detective-scss';
-import sassLookup from 'sass-lookup';
+import cabinet from 'filing-cabinet';
 import {CompilerBase} from '../compiler-base';
 
 const mimeTypes = ['text/sass', 'text/scss'];
@@ -53,10 +53,11 @@ export default class SassCompiler extends CompilerBase {
 
     sass.importer(this.buildImporterCallback(paths));
 
-    let opts = Object.assign({}, this.compilerOptions, {
+    let opts = {
+      ...this.compilerOptions,
       indentedSyntax: filePath.match(/\.sass$/i),
       sourceMapRoot: filePath,
-    });
+    };
 
     let result = await new Promise((res,rej) => {
       sass.compile(sourceCode, opts, (r) => {
@@ -95,7 +96,11 @@ export default class SassCompiler extends CompilerBase {
     let dependencies = [];
 
     for (let dependencyName of dependencyFilenames) {
-      dependencies.push(sassLookup(dependencyName, path.basename(filePath), path.dirname(filePath)));
+      dependencies.push(cabinet({
+        partial: dependencyName,
+        filename: filePath,
+        directory: path.dirname(filePath)
+      }));
     }
 
     return dependencies;
@@ -116,10 +121,11 @@ export default class SassCompiler extends CompilerBase {
     paths.unshift('.');
     sass.importer(this.buildImporterCallback(paths));
 
-    let opts = Object.assign({}, this.compilerOptions, {
+    let opts = {
+      ...this.compilerOptions,
       indentedSyntax: filePath.match(/\.sass$/i),
       sourceMapRoot: filePath,
-    });
+    };
 
     let result;
     toutSuite(() => {

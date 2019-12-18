@@ -1,12 +1,12 @@
 import {SimpleCompilerBase} from '../compiler-base';
 
-const inputMimeTypes = ['text/jade'];
-let jade = null;
+const inputMimeTypes = ['text/pug'];
+let pug = null;
 
 /**
  * @access private
  */ 
-export default class JadeCompiler extends SimpleCompilerBase {
+export default class PugCompiler extends SimpleCompilerBase {
   constructor() {
     super();
     this.compilerOptions.sourceMap = true;
@@ -17,13 +17,13 @@ export default class JadeCompiler extends SimpleCompilerBase {
   }
 
   compileSync(sourceCode, filePath) {
-    jade = jade || require('jade');
+    pug = pug || require('pug');
 
-    let code = jade.render(
+    let code = pug.render(
       sourceCode,
       {
         filename: filePath,
-        cache: false,
+        cache: false, 
         ...this.compilerOptions
       });
 
@@ -31,6 +31,6 @@ export default class JadeCompiler extends SimpleCompilerBase {
   }
   
   getCompilerVersion() {
-    return require('jade/package.json').version;
+    return require('pug/package.json').version;
   }
 }

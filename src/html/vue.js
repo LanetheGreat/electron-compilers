@@ -9,6 +9,7 @@ const mimeTypeToSimpleType = {
   'text/typescript': 'ts',
   'application/javascript': 'js',
   'text/jade': 'jade',
+  'text/pug': 'pug',
   'text/less': 'less',
   'text/sass': 'sass',
   'text/scss': 'scss',
@@ -114,7 +115,7 @@ export default class VueCompiler extends CompilerBase {
   async compile(sourceCode, filePath, compilerContext) { // eslint-disable-line no-unused-vars
     vueify = vueify || require('@paulcbetts/vueify');
 
-    let opts = Object.assign({}, this.compilerOptions);
+    let opts = {...this.compilerOptions};
 
     let code = await new Promise((res, rej) => {
       vueify.compiler.compileNoGlobals(sourceCode, filePath, this.asyncCompilers, opts, (e,r) => {
@@ -139,7 +140,7 @@ export default class VueCompiler extends CompilerBase {
   compileSync(sourceCode, filePath, compilerContext) { // eslint-disable-line no-unused-vars
     vueify = vueify || require('@paulcbetts/vueify');
 
-    let opts = Object.assign({}, this.compilerOptions);
+    let opts = {...this.compilerOptions};
 
     let err,code;
     toutSuite(() => {

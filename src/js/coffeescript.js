@@ -23,7 +23,10 @@ export default class CoffeeScriptCompiler extends SimpleCompilerBase {
 
     let {js, v3SourceMap} = coffee.compile(
       sourceCode,
-      Object.assign({ filename: filePath }, this.compilerOptions));
+      {
+        filename: filePath,
+        ...this.compilerOptions
+      });
 
     js = `${js}\n` +
       `//# sourceMappingURL=data:application/json;base64,${btoa(unescape(encodeURIComponent(v3SourceMap)))}\n` +
