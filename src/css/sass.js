@@ -22,7 +22,11 @@ export default class SassCompiler extends CompilerBase {
       sourceMapContents: true
     };
 
-    this.seenFilePaths = {};
+    // Use an object instead of an array to maintain search order when adding/re-adding new paths.
+    this.seenFilePaths = {
+      '.': true,            // Include the project's cwd first.
+      'node_modules': true, // Then the node_modules folder for importing SASS/SCSS libraries.
+    };
   }
 
   static getInputMimeTypes() {
@@ -48,8 +52,6 @@ export default class SassCompiler extends CompilerBase {
     if (this.compilerOptions.paths) {
       paths.push(...this.compilerOptions.paths);
     }
-
-    paths.unshift('.');
 
     sass.importer(this.buildImporterCallback(paths));
 
@@ -118,7 +120,6 @@ export default class SassCompiler extends CompilerBase {
       paths.push(...this.compilerOptions.paths);
     }
 
-    paths.unshift('.');
     sass.importer(this.buildImporterCallback(paths));
 
     let opts = {
@@ -131,7 +132,7 @@ export default class SassCompiler extends CompilerBase {
     toutSuite(() => {
       sass.compile(sourceCode, opts, (r) => {
         if (r.status !== 0) {
-          throw new Error(r.formatted);
+          throw new Error(r.formatted || r.message);
         }
         result = r;
       });
@@ -169,7 +170,13 @@ export default class SassCompiler extends CompilerBase {
       } else {
         // sass.js works in the '/sass/' directory
         const cleanedRequestPath = request.resolved.replace(/^\/sass\//, '');
-        for (let includePath of includePaths) {
+        const cleanedPrevPath = request.previous.replace(/^\/sass\//, '');
+        const cleanedIncludes = [...includePaths];
+
+        if (request.previous !== 'stdin')
+          cleanedIncludes.unshift(path.dirname(cleanedPrevPath));
+
+        for (let includePath of cleanedIncludes) {
           const filePath = path.resolve(includePath, cleanedRequestPath);
           let variations = sass.getPathVariations(filePath);
 
@@ -227,9 +234,6 @@ export default class SassCompiler extends CompilerBase {
   }
 
   getCompilerVersion() {
-    // NB: There is a bizarre bug in the node module system where this doesn't
-    // work but only in saveConfiguration tests
-    //return require('@paulcbetts/node-sass/package.json').version;
-    return "4.1.1";
+    return require('sass.js/package.json').libsass;
   }
 }
