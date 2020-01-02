@@ -26,6 +26,20 @@ export class CompilerBase {
 
 
   /**
+   * Returns a calculated list of paths that will be searched during imports.
+   *
+   * @param  {string} fileName  The full path of a file to compile.
+   * @return {string[]}         A array of folder paths, or an empty
+   *                            array if there are no import folders.
+   *
+   * @abstract
+   */
+  determineImportPaths(filePath) { // eslint-disable-line no-unused-vars
+    throw new Error("Implement me!");
+  }
+
+
+  /**
    * Determines whether a file should be compiled
    *
    * @param  {string} fileName        The full path of a file to compile.
@@ -52,12 +66,15 @@ export class CompilerBase {
    * @param  {object} compilerContext An object that compilers can add extra
                                     information to as part of a job - the caller
                                     won't do anything with this.
-   * @return {Promise<string[]>}    An array of dependent file paths, or an empty
-   *                                array if there are no dependent files.
+   * @param  {object} fileSet       An object whose keys will have the imported
+   *                                files in the order in which they were imported
+   *                                and deduplicated.
+   * @return {Promise<string[]>}    A sorted array of dependent file paths, or an
+   *                                empty array if there are no dependent files.
    *
    * @abstract
    */
-  async determineDependentFiles(sourceCode, fileName, compilerContext) { // eslint-disable-line no-unused-vars
+  async determineDependentFiles(sourceCode, fileName, compilerContext, fileSet={}) { // eslint-disable-line no-unused-vars
     throw new Error("Implement me!");
   }
 
@@ -74,6 +91,11 @@ export class CompilerBase {
    * @property {string} code        The compiled code
    * @property {string} mimeType    The MIME type of the compiled result, which
    *                                should exist in the mime-types database.
+   * @property {object} sourceMaps  An object containing the v3 source maps if
+   *                                any are provided by the compiler.
+   * @property {string[]} dependencies A sorted array of dependent file paths,
+   *                                or an empty array if there are no dependent
+   *                                files.
    *
    * @abstract
    */
@@ -85,7 +107,7 @@ export class CompilerBase {
     throw new Error("Implement me!");
   }
 
-  determineDependentFilesSync(sourceCode, fileName, compilerContext) { // eslint-disable-line no-unused-vars
+  determineDependentFilesSync(sourceCode, fileName, compilerContext, fileSet={}) { // eslint-disable-line no-unused-vars
     throw new Error("Implement me!");
   }
 
@@ -125,11 +147,15 @@ export class SimpleCompilerBase extends CompilerBase {
     super();
   }
 
+  determineImportPaths(filePath) { // eslint-disable-line no-unused-vars
+    return [process.cwd()];
+  }
+
   async shouldCompileFile(fileName, compilerContext) { // eslint-disable-line no-unused-vars
     return true;
   }
 
-  async determineDependentFiles(sourceCode, filePath, compilerContext) { // eslint-disable-line no-unused-vars
+  async determineDependentFiles(sourceCode, filePath, compilerContext, fileSet={}) { // eslint-disable-line no-unused-vars
     return [];
   }
 
@@ -141,7 +167,7 @@ export class SimpleCompilerBase extends CompilerBase {
     return true;
   }
 
-  determineDependentFilesSync(sourceCode, filePath, compilerContext) { // eslint-disable-line no-unused-vars
+  determineDependentFilesSync(sourceCode, filePath, compilerContext, fileSet={}) { // eslint-disable-line no-unused-vars
     return [];
   }
 }

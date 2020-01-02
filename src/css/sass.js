@@ -1,5 +1,6 @@
-import path from 'path';
 import fs from 'fs';
+import path from 'path';
+import {promisify} from 'util';
 import toutSuite from 'toutsuite';
 import detectiveSASS from 'detective-sass';
 import detectiveSCSS from 'detective-scss';
@@ -7,7 +8,20 @@ import cabinet from 'filing-cabinet';
 import {CompilerBase} from '../compiler-base';
 
 const mimeTypes = ['text/sass', 'text/scss'];
+const resolve = (loc) => path.resolve(loc.replace(/^\/sass\//, ''));
+const readFile = promisify(fs.readFile);
 let sass = null;
+
+function dedupe(arr) {
+  const set = arr.reduce(
+    (values, value) => {
+      values[value] = true;
+      return values;
+    },
+    {}
+  );
+  return Object.keys(set);
+}
 
 /**
  * @access private
@@ -22,37 +36,69 @@ export default class SassCompiler extends CompilerBase {
       sourceMapContents: true
     };
 
+    // Add all the possible node_module paths to look in.
+    this.libraryPaths = require.resolve.paths('').reduce(
+      (paths, path) => {
+        paths[path] = true;
+        return paths;
+      }, {}
+    );
+
     // Use an object instead of an array to maintain search order when adding/re-adding new paths.
-    this.seenFilePaths = {
-      '.': true,            // Include the project's cwd first.
-      'node_modules': true, // Then the node_modules folder for importing SASS/SCSS libraries.
-    };
+    this.seenFilePaths = {};
   }
 
   static getInputMimeTypes() {
     return mimeTypes;
+  }
+  
+  determineImportPaths(filePath) {
+    if (filePath) {
+      let thisPath = path.dirname(filePath);
+      this.seenFilePaths[thisPath] = true;
+    }
+
+    // Search order starts with current compiling file's directory.
+    let paths = Object.keys(this.seenFilePaths);
+
+    // Next any user specified file paths. (works as overrides)
+    if (this.compilerOptions.paths) {
+      paths.push(...this.compilerOptions.paths);
+    }
+
+    // Then finally the cwd (aka project directory) and the node_modules' paths.
+    paths.push(process.cwd());
+    paths.push(...Object.keys(this.libraryPaths));
+
+    return paths;
   }
 
   async shouldCompileFile(fileName, compilerContext) { // eslint-disable-line no-unused-vars
     return true;
   }
 
-  async determineDependentFiles(sourceCode, filePath, compilerContext) {
-    return this.determineDependentFilesSync(sourceCode, filePath, compilerContext);
+  async determineDependentFiles(sourceCode, filePath, compilerContext, fileSet={}) { // eslint-disable-line no-unused-vars
+    const dependencyFilenames = path.extname(filePath) === '.sass' ? detectiveSASS(sourceCode) : detectiveSCSS(sourceCode);
+
+    for (let dependencyName of dependencyFilenames) {
+      const dependencyFilepath = cabinet({
+        partial: dependencyName,
+        filename: filePath,
+        directory: this.determineImportPaths(filePath)
+      });
+      const dependencySource = await readFile(dependencyFilepath, 'utf-8');
+
+      fileSet[dependencyFilepath] = true;
+      await this.determineDependentFiles(dependencySource, dependencyFilepath, compilerContext, fileSet);
+    }
+
+    return Object.keys(fileSet).sort();
   }
 
   async compile(sourceCode, filePath, compilerContext) { // eslint-disable-line no-unused-vars
     sass = sass || this.getSass();
 
-    let thisPath = path.dirname(filePath);
-    this.seenFilePaths[thisPath] = true;
-
-    let paths = Object.keys(this.seenFilePaths);
-
-    if (this.compilerOptions.paths) {
-      paths.push(...this.compilerOptions.paths);
-    }
-
+    const paths = this.determineImportPaths(filePath);
     sass.importer(this.buildImporterCallback(paths));
 
     let opts = {
@@ -85,6 +131,10 @@ export default class SassCompiler extends CompilerBase {
 
     return {
       code: source,
+      sourceMaps: result.map || null,
+      dependencies: dedupe(result.files || [])
+        .map(resolve)
+        .sort(),
       mimeType: 'text/css'
     };
   }
@@ -93,33 +143,28 @@ export default class SassCompiler extends CompilerBase {
     return true;
   }
 
-  determineDependentFilesSync(sourceCode, filePath, compilerContext) { // eslint-disable-line no-unused-vars
-    let dependencyFilenames = path.extname(filePath) === '.sass' ? detectiveSASS(sourceCode) : detectiveSCSS(sourceCode);
-    let dependencies = [];
+  determineDependentFilesSync(sourceCode, filePath, compilerContext, fileSet={}) { // eslint-disable-line no-unused-vars
+    const dependencyFilenames = path.extname(filePath) === '.sass' ? detectiveSASS(sourceCode) : detectiveSCSS(sourceCode);
 
     for (let dependencyName of dependencyFilenames) {
-      dependencies.push(cabinet({
+      const dependencyFilepath = cabinet({
         partial: dependencyName,
         filename: filePath,
-        directory: path.dirname(filePath)
-      }));
+        directory: this.determineImportPaths(filePath)
+      });
+      const dependencySource = fs.readFileSync(dependencyFilepath, 'utf-8');
+
+      fileSet[dependencyFilepath] = true;
+      this.determineDependentFilesSync(dependencySource, dependencyFilepath, compilerContext, fileSet);
     }
 
-    return dependencies;
+    return Object.keys(fileSet).sort();
   }
 
   compileSync(sourceCode, filePath, compilerContext) { // eslint-disable-line no-unused-vars
     sass = sass || this.getSass();
 
-    let thisPath = path.dirname(filePath);
-    this.seenFilePaths[thisPath] = true;
-
-    let paths = Object.keys(this.seenFilePaths);
-
-    if (this.compilerOptions.paths) {
-      paths.push(...this.compilerOptions.paths);
-    }
-
+    const paths = this.determineImportPaths(filePath);
     sass.importer(this.buildImporterCallback(paths));
 
     let opts = {
@@ -150,6 +195,10 @@ export default class SassCompiler extends CompilerBase {
 
     return {
       code: source,
+      sourceMaps: result.map || null,
+      dependencies: dedupe(result.files || [])
+        .map(resolve)
+        .sort(),
       mimeType: 'text/css'
     };
   }
@@ -157,6 +206,15 @@ export default class SassCompiler extends CompilerBase {
   getSass() {
     let ret;
     toutSuite(() => ret = require('sass.js/dist/sass.node').Sass);
+
+    /* Remove sass.js's "unhandledRejection" event listener (abort function),
+     because it leads to Promise rejections causing "uncaughtException"
+     error handling that kills mocha mid-testing. */
+    for(let listener of process.listeners('unhandledRejection')) {
+      if(listener.name === 'abort')
+        process.removeListener('unhandledRejection', listener);
+    }
+
     return ret;
   }
 

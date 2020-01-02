@@ -105,7 +105,7 @@ export default class BabelCompiler extends SimpleCompilerBase {
       if (presets && presets.length === opts.presets.length) opts.presets = presets;
     }
 
-    const output = babel.transform(sourceCode, opts);
+    const output = babel.transformSync(sourceCode, opts);
     let sourceMaps = output.map ? JSON.stringify(output.map) : null;
 
     let code = output.code;

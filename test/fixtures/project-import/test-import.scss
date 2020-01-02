@@ -1,0 +1,7 @@
+// Test project directory file imports correctly.
+
+@import 'test/fixtures/imports/scss/_Color';
+
+.fake_fixture {
+  background-color: $fixture-color;
+}

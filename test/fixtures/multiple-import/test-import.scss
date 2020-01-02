@@ -1,0 +1,8 @@
+// Test library file imports correctly.
+
+@import 'library/scss/_Code';
+@import 'library/scss/_Divider';
+
+.fake_fixture {
+  background-color: $color-primary;
+}
