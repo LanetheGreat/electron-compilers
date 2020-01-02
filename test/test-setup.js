@@ -9,11 +9,12 @@ global.allCompilers = global.compilerClasses.reduce(
 global.expect = chai.expect;
 global.assert = chai.assert;
 
-global.compilersByMimeType = compilerClasses.reduce((mimeTypes, compiler) => 
-  Object.assign(mimeTypes, compiler.getInputMimeTypes().reduce((types, type) =>
-    Object.assign(types, {[type]: new compiler()}),
-    {}
-  )),
+global.compilersByMimeType = global.compilerClasses.reduce(
+  (mimeTypes, compiler) => 
+    Object.assign(mimeTypes, compiler.getInputMimeTypes().reduce(
+      (types, type) => Object.assign(types, {[type]: new compiler()}),
+      {}
+    )),
   {}
 );
 
@@ -24,5 +25,16 @@ global.compilersByMimeType['application/javascript'].compilerOptions = {
 global.compilersByMimeType['text/coffeescript'].compilerOptions = { sourceMap: true };
 
 global.compilersByMimeType['text/css'] = global.compilersByMimeType['text/plain'];
-global.compilersByMimeType['text/html'] = allCompilers.InlineHtmlCompiler.createFromCompilers(global.compilersByMimeType);
-global.compilersByMimeType['text/vue'] = allCompilers.VueCompiler.createFromCompilers(global.compilersByMimeType);
+global.compilersByMimeType['text/html'] = global.allCompilers.InlineHtmlCompiler.createFromCompilers(global.compilersByMimeType);
+global.compilersByMimeType['text/vue'] = global.allCompilers.VueCompiler.createFromCompilers(global.compilersByMimeType);
+
+global.dedupe = function dedupe(array) {
+  const values = array.reduce(
+    (values, value) => {
+      values[value] = true;
+      return values;
+    },
+    {}
+  );
+  return Object.keys(values);
+};

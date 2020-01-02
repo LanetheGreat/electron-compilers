@@ -1,9 +1,10 @@
 import './test-setup.js';
 import fs from 'fs';
 import path from 'path';
-import util from 'util';
+import {promisify} from 'util';
 
-const readFile = util.promisify(fs.readFile);
+/* eslint-disable no-undef */
+const readFile = promisify(fs.readFile);
 
 describe('compile all asynchronously', function() {
   const compilerGroups = {
@@ -92,16 +93,6 @@ describe('compile all asynchronously', function() {
     mimeType: 'application/javascript',
     codeType: 'string'
   };
-  
-  /* Remove sass.js's "unhandledRejection" event listener (abort function),
-  because it leads to Promise rejections causing "uncaughtException"
-  error handling that kills mocha mid-testing. */
-  beforeEach(function() {
-   for(let listener of process.listeners('unhandledRejection')) {
-     if(listener.name === 'abort')
-       process.removeListener('unhandledRejection', listener);
-   }
- });
 
   for(let [groupName, group] of Object.entries(compilerGroups)) {
     describe(`should compile ${groupName}`, function() {

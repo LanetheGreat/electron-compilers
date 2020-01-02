@@ -6,6 +6,8 @@ import fs from 'fs';
 import mkdirp from 'mkdirp';
 import _ from 'lodash';
 
+/* eslint-disable no-unused-vars */
+
 export default class CompileCache {
   constructor() {
     this.stats = {

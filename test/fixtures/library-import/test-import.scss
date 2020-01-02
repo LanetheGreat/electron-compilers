@@ -1,0 +1,7 @@
+// Test library file imports correctly.
+
+@import 'milligram-scss/dist/_Color';
+
+.fake_fixture {
+  background-color: $color-primary;
+}

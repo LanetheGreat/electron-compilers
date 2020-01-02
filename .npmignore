@@ -1,6 +1,7 @@
 test-dist/
 docs/
 src/
+test/
 .babelrc
 .eslintrc
 .npmignore
