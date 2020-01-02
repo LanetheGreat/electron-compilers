@@ -169,6 +169,15 @@ export default class SassCompiler extends CompilerBase {
   getSass() {
     let ret;
     toutSuite(() => ret = require('sass.js/dist/sass.node').Sass);
+
+    /* Remove sass.js's "unhandledRejection" event listener (abort function),
+     because it leads to Promise rejections causing "uncaughtException"
+     error handling that kills mocha mid-testing. */
+    for(let listener of process.listeners('unhandledRejection')) {
+      if(listener.name === 'abort')
+        process.removeListener('unhandledRejection', listener);
+    }
+
     return ret;
   }
 
