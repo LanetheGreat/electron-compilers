@@ -5,6 +5,7 @@ import {CompilerBase} from '../compiler-base';
 import toutSuite from 'toutsuite';
 
 const mimeTypes = ['text/less'];
+const resolve = (loc) => path.resolve(loc);
 let lessjs = null;
 
 /**
@@ -87,6 +88,9 @@ export default class LessCompiler extends CompilerBase {
     return {
       code: source,
       sourceMaps: result.map || null,
+      dependencies: (result.imports || [])
+        .map(resolve)
+        .sort(),
       mimeType: 'text/css'
     };
   }
@@ -113,7 +117,7 @@ export default class LessCompiler extends CompilerBase {
   compileSync(sourceCode, filePath, compilerContext) { // eslint-disable-line no-unused-vars
     lessjs = lessjs || this.getLess();
 
-    let source, map;
+    let source, map, imports;
     let error = null;
 
     const paths = this.determineImportPaths(filePath);
@@ -132,6 +136,9 @@ export default class LessCompiler extends CompilerBase {
           // NB: Because we've forced less to work in sync mode, we can do this
           source = out.css;
           map = out.map || null;
+          imports = (out.imports || [])
+            .map(resolve)
+            .sort();
         }
       });
     });
@@ -151,6 +158,7 @@ export default class LessCompiler extends CompilerBase {
     return {
       code: source,
       sourceMaps: map,
+      dependencies: imports,
       mimeType: 'text/css'
     };
   }

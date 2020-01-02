@@ -90,6 +90,9 @@ export class CompilerBase {
    *                                should exist in the mime-types database.
    * @property {object} sourceMaps  An object containing the v3 source maps if
    *                                any are provided by the compiler.
+   * @property {string[]} dependencies A sorted array of dependent file paths,
+   *                                or an empty array if there are no dependent
+   *                                files.
    *
    * @abstract
    */

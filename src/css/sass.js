@@ -7,7 +7,19 @@ import cabinet from 'filing-cabinet';
 import {CompilerBase} from '../compiler-base';
 
 const mimeTypes = ['text/sass', 'text/scss'];
+const resolve = (loc) => path.resolve(loc.replace(/^\/sass\//, ''));
 let sass = null;
+
+function dedupe(arr) {
+  const set = arr.reduce(
+    (values, value) => {
+      values[value] = true;
+      return values;
+    },
+    {}
+  );
+  return Object.keys(set);
+}
 
 /**
  * @access private
@@ -104,6 +116,9 @@ export default class SassCompiler extends CompilerBase {
     return {
       code: source,
       sourceMaps: result.map || null,
+      dependencies: dedupe(result.files || [])
+        .map(resolve)
+        .sort(),
       mimeType: 'text/css'
     };
   }
@@ -162,6 +177,9 @@ export default class SassCompiler extends CompilerBase {
     return {
       code: source,
       sourceMaps: result.map || null,
+      dependencies: dedupe(result.files || [])
+        .map(resolve)
+        .sort(),
       mimeType: 'text/css'
     };
   }

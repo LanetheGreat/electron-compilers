@@ -5,6 +5,7 @@ import {CompilerBase} from '../compiler-base';
 import {basename} from 'path';
 
 const mimeTypes = ['text/stylus'];
+const resolve = (loc) => path.resolve(loc);
 
 let stylusjs = null;
 let nib = null;
@@ -75,6 +76,7 @@ export default class StylusCompiler extends CompilerBase {
 
     let opts = this.makeOpts(filePath);
     let sourceMaps = null;
+    let imports = [];
 
     let code = await new Promise((res,rej) => {
       let styl = stylusjs(sourceCode, opts);
@@ -86,13 +88,19 @@ export default class StylusCompiler extends CompilerBase {
           rej(err);
         } else {
           sourceMaps = styl.sourcemap;
+          imports = styl.deps()
+            .map(resolve)
+            .sort();
           res(css);
         }
       });
     });
 
     return {
-      code, sourceMaps, mimeType: 'text/css'
+      code,
+      sourceMaps,
+      dependencies: imports,
+      mimeType: 'text/css'
     };
   }
 
@@ -173,6 +181,9 @@ export default class StylusCompiler extends CompilerBase {
     return {
       code,
       sourceMaps,
+      dependencies: styl.deps()
+        .map(resolve)
+        .sort(),
       mimeType: 'text/css'
     };
   }
