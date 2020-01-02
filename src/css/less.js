@@ -64,6 +64,7 @@ export default class LessCompiler extends CompilerBase {
 
     return {
       code: source,
+      sourceMaps: result.map || null,
       mimeType: 'text/css'
     };
   }
@@ -90,7 +91,7 @@ export default class LessCompiler extends CompilerBase {
   compileSync(sourceCode, filePath, compilerContext) { // eslint-disable-line no-unused-vars
     lessjs = lessjs || this.getLess();
 
-    let source;
+    let source, map;
     let error = null;
 
     let thisPath = path.dirname(filePath);
@@ -116,6 +117,7 @@ export default class LessCompiler extends CompilerBase {
         } else {
           // NB: Because we've forced less to work in sync mode, we can do this
           source = out.css;
+          map = out.map || null;
         }
       });
     });
@@ -134,6 +136,7 @@ export default class LessCompiler extends CompilerBase {
 
     return {
       code: source,
+      sourceMaps: map,
       mimeType: 'text/css'
     };
   }

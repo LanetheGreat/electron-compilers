@@ -74,6 +74,8 @@ export class CompilerBase {
    * @property {string} code        The compiled code
    * @property {string} mimeType    The MIME type of the compiled result, which
    *                                should exist in the mime-types database.
+   * @property {object} sourceMaps  An object containing the v3 source maps if
+   *                                any are provided by the compiler.
    *
    * @abstract
    */

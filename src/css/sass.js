@@ -85,6 +85,7 @@ export default class SassCompiler extends CompilerBase {
 
     return {
       code: source,
+      sourceMaps: result.map || null,
       mimeType: 'text/css'
     };
   }
@@ -150,6 +151,7 @@ export default class SassCompiler extends CompilerBase {
 
     return {
       code: source,
+      sourceMaps: result.map || null,
       mimeType: 'text/css'
     };
   }

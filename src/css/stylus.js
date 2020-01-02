@@ -48,6 +48,7 @@ export default class StylusCompiler extends CompilerBase {
     this.seenFilePaths[path.dirname(filePath)] = true;
 
     let opts = this.makeOpts(filePath);
+    let sourceMaps = null;
 
     let code = await new Promise((res,rej) => {
       let styl = stylusjs(sourceCode, opts);
@@ -58,13 +59,14 @@ export default class StylusCompiler extends CompilerBase {
         if (err) {
           rej(err);
         } else {
+          sourceMaps = styl.sourcemap;
           res(css);
         }
       });
     });
 
     return {
-      code, mimeType: 'text/css'
+      code, sourceMaps, mimeType: 'text/css'
     };
   }
 
@@ -134,12 +136,17 @@ export default class StylusCompiler extends CompilerBase {
     stylusjs = stylusjs || require('stylus');
     this.seenFilePaths[path.dirname(filePath)] = true;
 
-    let opts = this.makeOpts(filePath), styl = stylusjs(sourceCode, opts);
+    let opts = this.makeOpts(filePath),
+        styl = stylusjs(sourceCode, opts);
 
     this.applyOpts(opts, styl);
+    
+    const code = styl.render(),
+          sourceMaps = styl.sourcemap || null;
 
     return {
-      code: styl.render(),
+      code,
+      sourceMaps,
       mimeType: 'text/css'
     };
   }
