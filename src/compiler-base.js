@@ -26,6 +26,20 @@ export class CompilerBase {
 
 
   /**
+   * Returns a calculated list of paths that will be searched during imports.
+   *
+   * @param  {string} fileName  The full path of a file to compile.
+   * @return {string[]}         A array of folder paths, or an empty
+   *                            array if there are no import folders.
+   *
+   * @abstract
+   */
+  determineImportPaths(filePath) { // eslint-disable-line no-unused-vars
+    throw new Error("Implement me!");
+  }
+
+
+  /**
    * Determines whether a file should be compiled
    *
    * @param  {string} fileName        The full path of a file to compile.
@@ -125,6 +139,10 @@ export class CompilerBase {
 export class SimpleCompilerBase extends CompilerBase {
   constructor() {
     super();
+  }
+
+  determineImportPaths(filePath) { // eslint-disable-line no-unused-vars
+    return [process.cwd()];
   }
 
   async shouldCompileFile(fileName, compilerContext) { // eslint-disable-line no-unused-vars

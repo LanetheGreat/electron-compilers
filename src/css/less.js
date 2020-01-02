@@ -18,11 +18,41 @@ export default class LessCompiler extends CompilerBase {
       sourceMap: { sourceMapFileInline: true }
     };
 
+    // Add all the possible node_module paths to look in.
+    this.libraryPaths = require.resolve.paths('').reduce(
+      (paths, path) => {
+        paths[path] = true;
+        return paths;
+      }, {}
+    );
+
+    // Use an object instead of an array to maintain search order when adding/re-adding new paths.
     this.seenFilePaths = {};
   }
 
   static getInputMimeTypes() {
     return mimeTypes;
+  }
+  
+  determineImportPaths(filePath) {
+    if (filePath) {
+      let thisPath = path.dirname(filePath);
+      this.seenFilePaths[thisPath] = true;
+    }
+
+    // Search order starts with current compiling file's directory.
+    let paths = Object.keys(this.seenFilePaths);
+
+    // Next any user specified file paths. (works as overrides)
+    if (this.compilerOptions.paths) {
+      paths.push(...this.compilerOptions.paths);
+    }
+
+    // Then finally the cwd (aka project directory) and the node_modules' paths.
+    paths.push(process.cwd());
+    paths.push(...Object.keys(this.libraryPaths));
+
+    return paths;
   }
 
   async shouldCompileFile(fileName, compilerContext) { // eslint-disable-line no-unused-vars
@@ -36,18 +66,10 @@ export default class LessCompiler extends CompilerBase {
   async compile(sourceCode, filePath, compilerContext) { // eslint-disable-line no-unused-vars
     lessjs = lessjs || this.getLess();
 
-    let thisPath = path.dirname(filePath);
-    this.seenFilePaths[thisPath] = true;
-
-    let paths = Object.keys(this.seenFilePaths);
-
-    if (this.compilerOptions.paths) {
-      paths.push(...this.compilerOptions.paths);
-    }
-
+    const paths = this.determineImportPaths(filePath);
     let opts = {
       ...this.compilerOptions,
-      paths: paths,
+      paths,
       filename: path.basename(filePath)
     };
 
@@ -94,18 +116,10 @@ export default class LessCompiler extends CompilerBase {
     let source, map;
     let error = null;
 
-    let thisPath = path.dirname(filePath);
-    this.seenFilePaths[thisPath] = true;
-
-    let paths = Object.keys(this.seenFilePaths);
-
-    if (this.compilerOptions.paths) {
-      paths.push(...this.compilerOptions.paths);
-    }
-
+    const paths = this.determineImportPaths(filePath);
     let opts = {
       ...this.compilerOptions,
-      paths: paths,
+      paths,
       filename: path.basename(filePath),
       fileAsync: false, async: false, syncImport: true
     };

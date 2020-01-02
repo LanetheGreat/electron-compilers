@@ -22,15 +22,41 @@ export default class SassCompiler extends CompilerBase {
       sourceMapContents: true
     };
 
+    // Add all the possible node_module paths to look in.
+    this.libraryPaths = require.resolve.paths('').reduce(
+      (paths, path) => {
+        paths[path] = true;
+        return paths;
+      }, {}
+    );
+
     // Use an object instead of an array to maintain search order when adding/re-adding new paths.
-    this.seenFilePaths = {
-      '.': true,            // Include the project's cwd first.
-      'node_modules': true, // Then the node_modules folder for importing SASS/SCSS libraries.
-    };
+    this.seenFilePaths = {};
   }
 
   static getInputMimeTypes() {
     return mimeTypes;
+  }
+  
+  determineImportPaths(filePath) {
+    if (filePath) {
+      let thisPath = path.dirname(filePath);
+      this.seenFilePaths[thisPath] = true;
+    }
+
+    // Search order starts with current compiling file's directory.
+    let paths = Object.keys(this.seenFilePaths);
+
+    // Next any user specified file paths. (works as overrides)
+    if (this.compilerOptions.paths) {
+      paths.push(...this.compilerOptions.paths);
+    }
+
+    // Then finally the cwd (aka project directory) and the node_modules' paths.
+    paths.push(process.cwd());
+    paths.push(...Object.keys(this.libraryPaths));
+
+    return paths;
   }
 
   async shouldCompileFile(fileName, compilerContext) { // eslint-disable-line no-unused-vars
@@ -44,15 +70,7 @@ export default class SassCompiler extends CompilerBase {
   async compile(sourceCode, filePath, compilerContext) { // eslint-disable-line no-unused-vars
     sass = sass || this.getSass();
 
-    let thisPath = path.dirname(filePath);
-    this.seenFilePaths[thisPath] = true;
-
-    let paths = Object.keys(this.seenFilePaths);
-
-    if (this.compilerOptions.paths) {
-      paths.push(...this.compilerOptions.paths);
-    }
-
+    const paths = this.determineImportPaths(filePath);
     sass.importer(this.buildImporterCallback(paths));
 
     let opts = {
@@ -112,15 +130,7 @@ export default class SassCompiler extends CompilerBase {
   compileSync(sourceCode, filePath, compilerContext) { // eslint-disable-line no-unused-vars
     sass = sass || this.getSass();
 
-    let thisPath = path.dirname(filePath);
-    this.seenFilePaths[thisPath] = true;
-
-    let paths = Object.keys(this.seenFilePaths);
-
-    if (this.compilerOptions.paths) {
-      paths.push(...this.compilerOptions.paths);
-    }
-
+    const paths = this.determineImportPaths(filePath);
     sass.importer(this.buildImporterCallback(paths));
 
     let opts = {

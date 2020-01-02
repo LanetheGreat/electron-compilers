@@ -27,11 +27,37 @@ export default class StylusCompiler extends CompilerBase {
       import: ['nib']
     };
 
+    // Add all the possible node_module paths to look in.
+    this.libraryPaths = require.resolve.paths('').reduce(
+      (paths, path) => {
+        paths[path] = true;
+        return paths;
+      }, {}
+    );
+
+    // Use an object instead of an array to maintain search order when adding/re-adding new paths.
     this.seenFilePaths = {};
   }
 
   static getInputMimeTypes() {
     return mimeTypes;
+  }
+  
+  determineImportPaths() {
+    // Search order starts with current compiling file's directory.
+    let paths = Object.keys(this.seenFilePaths);
+
+    // Next any user specified file paths. (works as overrides)
+    if (this.compilerOptions.paths) {
+      paths.push(...this.compilerOptions.paths);
+    }
+
+    // Then finally the cwd (aka project directory) and the node_modules' paths.
+    paths.push(process.cwd());
+    paths.push(...Object.keys(this.libraryPaths));
+    paths.reverse(); // Stylus looks in the reverse order of the other compilers.
+
+    return paths;
   }
 
   async shouldCompileFile(fileName, compilerContext) { // eslint-disable-line no-unused-vars
@@ -109,7 +135,7 @@ export default class StylusCompiler extends CompilerBase {
       }
     });
 
-    stylus.set('paths', Object.keys(this.seenFilePaths).concat(['.']));
+    stylus.set('paths', this.determineImportPaths());
   }
 
   shouldCompileFileSync(fileName, compilerContext) { // eslint-disable-line no-unused-vars
@@ -137,12 +163,12 @@ export default class StylusCompiler extends CompilerBase {
     this.seenFilePaths[path.dirname(filePath)] = true;
 
     let opts = this.makeOpts(filePath),
-        styl = stylusjs(sourceCode, opts);
+      styl = stylusjs(sourceCode, opts);
 
     this.applyOpts(opts, styl);
     
     const code = styl.render(),
-          sourceMaps = styl.sourcemap || null;
+      sourceMaps = styl.sourcemap || null;
 
     return {
       code,
