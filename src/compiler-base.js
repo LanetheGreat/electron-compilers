@@ -66,12 +66,15 @@ export class CompilerBase {
    * @param  {object} compilerContext An object that compilers can add extra
                                     information to as part of a job - the caller
                                     won't do anything with this.
-   * @return {Promise<string[]>}    An array of dependent file paths, or an empty
-   *                                array if there are no dependent files.
+   * @param  {object} fileSet       An object whose keys will have the imported
+   *                                files in the order in which they were imported
+   *                                and deduplicated.
+   * @return {Promise<string[]>}    A sorted array of dependent file paths, or an
+   *                                empty array if there are no dependent files.
    *
    * @abstract
    */
-  async determineDependentFiles(sourceCode, fileName, compilerContext) { // eslint-disable-line no-unused-vars
+  async determineDependentFiles(sourceCode, fileName, compilerContext, fileSet={}) { // eslint-disable-line no-unused-vars
     throw new Error("Implement me!");
   }
 
@@ -104,7 +107,7 @@ export class CompilerBase {
     throw new Error("Implement me!");
   }
 
-  determineDependentFilesSync(sourceCode, fileName, compilerContext) { // eslint-disable-line no-unused-vars
+  determineDependentFilesSync(sourceCode, fileName, compilerContext, fileSet={}) { // eslint-disable-line no-unused-vars
     throw new Error("Implement me!");
   }
 
@@ -152,7 +155,7 @@ export class SimpleCompilerBase extends CompilerBase {
     return true;
   }
 
-  async determineDependentFiles(sourceCode, filePath, compilerContext) { // eslint-disable-line no-unused-vars
+  async determineDependentFiles(sourceCode, filePath, compilerContext, fileSet={}) { // eslint-disable-line no-unused-vars
     return [];
   }
 
@@ -164,7 +167,7 @@ export class SimpleCompilerBase extends CompilerBase {
     return true;
   }
 
-  determineDependentFilesSync(sourceCode, filePath, compilerContext) { // eslint-disable-line no-unused-vars
+  determineDependentFilesSync(sourceCode, filePath, compilerContext, fileSet={}) { // eslint-disable-line no-unused-vars
     return [];
   }
 }

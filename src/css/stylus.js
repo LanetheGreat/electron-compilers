@@ -1,6 +1,4 @@
 import path from 'path';
-import detective from 'detective-stylus';
-import cabinet from 'filing-cabinet';
 import {CompilerBase} from '../compiler-base';
 import {basename} from 'path';
 
@@ -65,8 +63,8 @@ export default class StylusCompiler extends CompilerBase {
     return true;
   }
 
-  async determineDependentFiles(sourceCode, filePath, compilerContext) { // eslint-disable-line no-unused-vars
-    return this.determineDependentFilesSync(sourceCode, filePath, compilerContext);
+  async determineDependentFiles(sourceCode, filePath, compilerContext, fileSet={}) { // eslint-disable-line no-unused-vars
+    return this.determineDependentFilesSync(sourceCode, filePath, compilerContext, fileSet);
   }
 
   async compile(sourceCode, filePath, compilerContext) { // eslint-disable-line no-unused-vars
@@ -150,19 +148,19 @@ export default class StylusCompiler extends CompilerBase {
     return true;
   }
 
-  determineDependentFilesSync(sourceCode, filePath, compilerContext) { // eslint-disable-line no-unused-vars
-    let dependencyFilenames = detective(sourceCode);
-    let dependencies = [];
+  determineDependentFilesSync(sourceCode, filePath, compilerContext, fileSet={}) { // eslint-disable-line no-unused-vars
+    nib = nib || require('nib');
+    stylusjs = stylusjs || require('stylus');
+    this.seenFilePaths[path.dirname(filePath)] = true;
 
-    for (let dependencyName of dependencyFilenames) {
-      dependencies.push(cabinet({
-        partial: dependencyName,
-        filename: filePath,
-        directory: path.dirname(filePath)
-      }));
-    }
+    let opts = this.makeOpts(filePath),
+      styl = stylusjs(sourceCode, opts);
 
-    return dependencies;
+    this.applyOpts(opts, styl);
+
+    return styl.deps()
+      .map(resolve)
+      .sort();
   }
 
   compileSync(sourceCode, filePath, compilerContext) { // eslint-disable-line no-unused-vars

@@ -108,7 +108,7 @@ export default class VueCompiler extends CompilerBase {
     return true;
   }
 
-  async determineDependentFiles(sourceCode, filePath, compilerContext) { // eslint-disable-line no-unused-vars
+  async determineDependentFiles(sourceCode, filePath, compilerContext, fileSet={}) { // eslint-disable-line no-unused-vars
     return [];
   }
 
@@ -133,7 +133,7 @@ export default class VueCompiler extends CompilerBase {
     return true;
   }
 
-  determineDependentFilesSync(sourceCode, filePath, compilerContext) { // eslint-disable-line no-unused-vars
+  determineDependentFilesSync(sourceCode, filePath, compilerContext, fileSet={}) { // eslint-disable-line no-unused-vars
     return [];
   }
 

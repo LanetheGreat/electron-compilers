@@ -1,5 +1,6 @@
-import path from 'path';
 import fs from 'fs';
+import path from 'path';
+import {promisify} from 'util';
 import toutSuite from 'toutsuite';
 import detectiveSASS from 'detective-sass';
 import detectiveSCSS from 'detective-scss';
@@ -8,6 +9,7 @@ import {CompilerBase} from '../compiler-base';
 
 const mimeTypes = ['text/sass', 'text/scss'];
 const resolve = (loc) => path.resolve(loc.replace(/^\/sass\//, ''));
+const readFile = promisify(fs.readFile);
 let sass = null;
 
 function dedupe(arr) {
@@ -75,8 +77,22 @@ export default class SassCompiler extends CompilerBase {
     return true;
   }
 
-  async determineDependentFiles(sourceCode, filePath, compilerContext) {
-    return this.determineDependentFilesSync(sourceCode, filePath, compilerContext);
+  async determineDependentFiles(sourceCode, filePath, compilerContext, fileSet={}) { // eslint-disable-line no-unused-vars
+    const dependencyFilenames = path.extname(filePath) === '.sass' ? detectiveSASS(sourceCode) : detectiveSCSS(sourceCode);
+
+    for (let dependencyName of dependencyFilenames) {
+      const dependencyFilepath = cabinet({
+        partial: dependencyName,
+        filename: filePath,
+        directory: this.determineImportPaths(filePath)
+      });
+      const dependencySource = await readFile(dependencyFilepath, 'utf-8');
+
+      fileSet[dependencyFilepath] = true;
+      await this.determineDependentFiles(dependencySource, dependencyFilepath, compilerContext, fileSet);
+    }
+
+    return Object.keys(fileSet).sort();
   }
 
   async compile(sourceCode, filePath, compilerContext) { // eslint-disable-line no-unused-vars
@@ -127,19 +143,22 @@ export default class SassCompiler extends CompilerBase {
     return true;
   }
 
-  determineDependentFilesSync(sourceCode, filePath, compilerContext) { // eslint-disable-line no-unused-vars
-    let dependencyFilenames = path.extname(filePath) === '.sass' ? detectiveSASS(sourceCode) : detectiveSCSS(sourceCode);
-    let dependencies = [];
+  determineDependentFilesSync(sourceCode, filePath, compilerContext, fileSet={}) { // eslint-disable-line no-unused-vars
+    const dependencyFilenames = path.extname(filePath) === '.sass' ? detectiveSASS(sourceCode) : detectiveSCSS(sourceCode);
 
     for (let dependencyName of dependencyFilenames) {
-      dependencies.push(cabinet({
+      const dependencyFilepath = cabinet({
         partial: dependencyName,
         filename: filePath,
-        directory: path.dirname(filePath)
-      }));
+        directory: this.determineImportPaths(filePath)
+      });
+      const dependencySource = fs.readFileSync(dependencyFilepath, 'utf-8');
+
+      fileSet[dependencyFilepath] = true;
+      this.determineDependentFilesSync(dependencySource, dependencyFilepath, compilerContext, fileSet);
     }
 
-    return dependencies;
+    return Object.keys(fileSet).sort();
   }
 
   compileSync(sourceCode, filePath, compilerContext) { // eslint-disable-line no-unused-vars

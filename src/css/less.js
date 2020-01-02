@@ -1,4 +1,6 @@
+import fs from 'fs';
 import path from 'path';
+import {promisify} from 'util';
 import detective from 'detective-less';
 import cabinet from 'filing-cabinet';
 import {CompilerBase} from '../compiler-base';
@@ -6,6 +8,7 @@ import toutSuite from 'toutsuite';
 
 const mimeTypes = ['text/less'];
 const resolve = (loc) => path.resolve(loc);
+const readFile = promisify(fs.readFile);
 let lessjs = null;
 
 /**
@@ -60,8 +63,22 @@ export default class LessCompiler extends CompilerBase {
     return true;
   }
 
-  async determineDependentFiles(sourceCode, filePath, compilerContext) {
-    return this.determineDependentFilesSync(sourceCode, filePath, compilerContext);
+  async determineDependentFiles(sourceCode, filePath, compilerContext, fileSet={}) {
+    const dependencyFilenames = detective(sourceCode);
+
+    for (let dependencyName of dependencyFilenames) {
+      const dependencyFilepath = cabinet({
+        partial: dependencyName,
+        filename: filePath,
+        directory: this.determineImportPaths(filePath)
+      });
+      const dependencySource = await readFile(dependencyFilepath, 'utf-8');
+
+      fileSet[dependencyFilepath] = true;
+      await this.determineDependentFiles(dependencySource, dependencyFilepath, compilerContext, fileSet);
+    }
+
+    return Object.keys(fileSet).sort();
   }
 
   async compile(sourceCode, filePath, compilerContext) { // eslint-disable-line no-unused-vars
@@ -99,19 +116,22 @@ export default class LessCompiler extends CompilerBase {
     return true;
   }
 
-  determineDependentFilesSync(sourceCode, filePath, compilerContext) { // eslint-disable-line no-unused-vars
-    let dependencyFilenames = detective(sourceCode);
-    let dependencies = [];
+  determineDependentFilesSync(sourceCode, filePath, compilerContext, fileSet={}) { // eslint-disable-line no-unused-vars
+    const dependencyFilenames = detective(sourceCode);
 
     for (let dependencyName of dependencyFilenames) {
-      dependencies.push(cabinet({
+      const dependencyFilepath = cabinet({
         partial: dependencyName,
         filename: filePath,
-        directory: path.dirname(filePath)
-      }));
+        directory: this.determineImportPaths(filePath)
+      });
+      const dependencySource = fs.readFileSync(dependencyFilepath, 'utf-8');
+
+      fileSet[dependencyFilepath] = true;
+      this.determineDependentFilesSync(dependencySource, dependencyFilepath, compilerContext, fileSet);
     }
 
-    return dependencies;
+    return Object.keys(fileSet).sort();
   }
 
   compileSync(sourceCode, filePath, compilerContext) { // eslint-disable-line no-unused-vars
