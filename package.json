@@ -7,7 +7,7 @@
     "doc": "esdoc -c ./esdoc.json",
     "compile": "git clean -xdf lib && babel -d lib/ src/",
     "lint": "eslint src test",
-    "prepare": "npm run compile",
+    "prepare": "patch-package && npm run compile",
     "test": "mocha --require @babel/register test/*.js"
   },
   "repository": {
@@ -78,6 +78,7 @@
     "milligram-sass": "^1.0.0",
     "milligram-scss": "^1.0.0",
     "milligram-stylus": "^1.0.0",
-    "mocha": "^6.0.0"
+    "mocha": "^6.0.0",
+    "patch-package": "^6.0.0"
   }
 }

@@ -1,0 +1,13 @@
+diff --git a/node_modules/stylus/lib/visitor/deps-resolver.js b/node_modules/stylus/lib/visitor/deps-resolver.js
+index b5597ca..dd96229 100644
+--- a/node_modules/stylus/lib/visitor/deps-resolver.js
++++ b/node_modules/stylus/lib/visitor/deps-resolver.js
+@@ -110,7 +110,7 @@ DepsResolver.prototype.visitCall = function(call) {
+  */
+ 
+ DepsResolver.prototype.visitImport = function(node) {
+-  var path = node.path.first.val
++  var path = !node.path.first.val.isNull && node.path.first.val || node.path.first.name
+     , literal, found, oldPath;
+ 
+   if (!path) return;

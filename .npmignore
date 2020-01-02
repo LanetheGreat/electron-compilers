@@ -1,5 +1,6 @@
 test-dist/
 docs/
+patches/
 src/
 test/
 .babelrc
